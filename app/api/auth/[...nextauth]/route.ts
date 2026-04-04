@@ -6,26 +6,22 @@
 import { handlers } from "@/lib/auth";
 import { logApiRequest } from "@/lib/api-request-log";
 
-type NextAuthContext = {
-    params: Promise<{ nextauth: string[] }>;
-};
-
-export async function GET(request: Request, context: NextAuthContext) {
+export async function GET(request: Request) {
     await logApiRequest({
         request,
         endpoint: "/api/auth/[...nextauth]",
         userId: null,
     });
 
-    return handlers.GET(request, context);
+    return handlers.GET(request);
 }
 
-export async function POST(request: Request, context: NextAuthContext) {
+export async function POST(request: Request) {
     await logApiRequest({
         request,
         endpoint: "/api/auth/[...nextauth]",
         userId: null,
     });
 
-    return handlers.POST(request, context);
+    return handlers.POST(request);
 }
