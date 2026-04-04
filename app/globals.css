@@ -1,0 +1,532 @@
+@import "tailwindcss";
+
+/* =====================
+   NEOBRUTALISM DESIGN SYSTEM
+   bikinqrisdinamis
+   ===================== */
+
+@theme inline {
+  /* Typography */
+  --font-heading: "Archivo Black", sans-serif;
+  --font-mono: "Space Mono", monospace;
+  --font-sans: "Inter", sans-serif;
+
+  /* Color Palette — Neobrutalism */
+  --color-nb-bg: #fffbf0;
+  --color-nb-card: #ffffff;
+  --color-nb-black: #0d0d0d;
+  --color-nb-gray: #4a4a4a;
+  --color-nb-gray-light: #e5e5e5;
+  --color-nb-yellow: #9fd9b4;
+  --color-nb-yellow-dark: #7fbc97;
+  --color-nb-red: #ff3b3b;
+  --color-nb-red-dark: #cc2a2a;
+  --color-nb-blue: #2563ff;
+  --color-nb-blue-dark: #1d4ed8;
+  --color-nb-green: #00c853;
+  --color-nb-green-dark: #00a040;
+  --color-nb-orange: #ff6b00;
+  --color-nb-purple: #7c3aed;
+
+  /* Shadows — Neobrutalism signature */
+  --shadow-nb-sm: 2px 2px 0px #0d0d0d;
+  --shadow-nb: 4px 4px 0px #0d0d0d;
+  --shadow-nb-md: 6px 6px 0px #0d0d0d;
+  --shadow-nb-lg: 8px 8px 0px #0d0d0d;
+  --shadow-nb-xl: 12px 12px 0px #0d0d0d;
+
+  /* Border */
+  --border-nb: 2px solid #0d0d0d;
+  --border-nb-thick: 3px solid #0d0d0d;
+}
+
+/* Base Reset */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-nb-bg);
+  color: var(--color-nb-black);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Typography */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+/* Polka Dot Pattern */
+.pattern-dots {
+  background-image: radial-gradient(circle, #0d0d0d 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.pattern-dots-yellow {
+  background-image: radial-gradient(circle, var(--color-nb-yellow) 1.5px, transparent 1.5px);
+  background-size: 24px 24px;
+}
+
+/* Stripe Pattern */
+.pattern-stripe {
+  background-image: repeating-linear-gradient(-45deg,
+      transparent,
+      transparent 4px,
+      rgba(13, 13, 13, 0.05) 4px,
+      rgba(13, 13, 13, 0.05) 8px);
+}
+
+/* Neobrutalism Button Base */
+.btn-nb {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.25rem;
+  font-family: var(--font-heading);
+  font-size: 0.875rem;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+  border: 2px solid #0d0d0d;
+  cursor: pointer;
+  transition: transform 80ms ease, box-shadow 80ms ease;
+  text-decoration: none;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.btn-nb:hover {
+  transform: translate(-2px, -2px);
+}
+
+.btn-nb:active {
+  transform: translate(2px, 2px);
+}
+
+.btn-nb-primary {
+  background-color: var(--color-nb-yellow);
+  color: #0d0d0d;
+  box-shadow: 4px 4px 0px #0d0d0d;
+}
+
+.btn-nb-primary:hover {
+  box-shadow: 6px 6px 0px #0d0d0d;
+}
+
+.btn-nb-primary:active {
+  box-shadow: 2px 2px 0px #0d0d0d;
+}
+
+.btn-nb-black {
+  background-color: #0d0d0d;
+  color: var(--color-nb-yellow);
+  box-shadow: 4px 4px 0px var(--color-nb-yellow);
+}
+
+.btn-nb-black:hover {
+  box-shadow: 6px 6px 0px var(--color-nb-yellow);
+}
+
+.btn-nb-black:active {
+  box-shadow: 2px 2px 0px var(--color-nb-yellow);
+}
+
+.btn-nb-white {
+  background-color: #ffffff;
+  color: #0d0d0d;
+  box-shadow: 4px 4px 0px #0d0d0d;
+}
+
+.btn-nb-white:hover {
+  box-shadow: 6px 6px 0px #0d0d0d;
+}
+
+.btn-nb-white:active {
+  box-shadow: 2px 2px 0px #0d0d0d;
+}
+
+.btn-nb-danger {
+  background-color: #ff3b3b;
+  color: #ffffff;
+  box-shadow: 4px 4px 0px #0d0d0d;
+}
+
+.btn-nb-danger:hover {
+  box-shadow: 6px 6px 0px #0d0d0d;
+}
+
+.btn-nb-danger:active {
+  box-shadow: 2px 2px 0px #0d0d0d;
+}
+
+.btn-nb-green {
+  background-color: #00c853;
+  color: #0d0d0d;
+  box-shadow: 4px 4px 0px #0d0d0d;
+}
+
+.btn-nb-green:hover {
+  box-shadow: 6px 6px 0px #0d0d0d;
+}
+
+.btn-nb-green:active {
+  box-shadow: 2px 2px 0px #0d0d0d;
+}
+
+/* Neobrutalism Card */
+.card-nb {
+  background-color: #ffffff;
+  border: 2px solid #0d0d0d;
+  box-shadow: 4px 4px 0px #0d0d0d;
+  border-radius: 0;
+}
+
+.card-nb-hover {
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.card-nb-hover:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 7px 7px 0px #0d0d0d;
+}
+
+/* Neobrutalism Input */
+.input-nb {
+  width: 100%;
+  padding: 0.625rem 0.875rem;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  background-color: #ffffff;
+  border: 2px solid #0d0d0d;
+  box-shadow: 2px 2px 0px #0d0d0d;
+  outline: none;
+  transition: box-shadow 80ms ease;
+}
+
+.input-nb:focus {
+  box-shadow: 4px 4px 0px var(--color-nb-yellow);
+  border-color: #0d0d0d;
+}
+
+.input-nb::placeholder {
+  color: #9ca3af;
+  font-family: var(--font-sans);
+}
+
+/* Badge */
+.badge-nb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 2px solid #0d0d0d;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.badge-nb-pending {
+  background-color: var(--color-nb-yellow);
+  color: #0d0d0d;
+}
+
+.badge-nb-waiting {
+  background-color: #ff6b00;
+  color: #ffffff;
+}
+
+.badge-nb-paid {
+  background-color: #00c853;
+  color: #0d0d0d;
+}
+
+.badge-nb-failed {
+  background-color: #ff3b3b;
+  color: #ffffff;
+}
+
+.badge-nb-expired {
+  background-color: #9ca3af;
+  color: #ffffff;
+}
+
+/* Section */
+.section-nb {
+  padding: 5rem 1.5rem;
+}
+
+/* Marquee Animation */
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-marquee {
+  animation: marquee 20s linear infinite;
+}
+
+/* Float Animation */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Pulse Yellow */
+@keyframes pulse-yellow {
+
+  0%,
+  100% {
+    box-shadow: 4px 4px 0px #0d0d0d;
+  }
+
+  50% {
+    box-shadow: 6px 6px 0px var(--color-nb-yellow);
+  }
+}
+
+.animate-pulse-yellow {
+  animation: pulse-yellow 2s ease-in-out infinite;
+}
+
+/* Shake */
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-4px);
+  }
+
+  75% {
+    transform: translateX(4px);
+  }
+}
+
+.animate-shake {
+  animation: shake 0.5s ease-in-out;
+}
+
+/* Modal overlay */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(13, 13, 13, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 1rem;
+}
+
+.modal-content {
+  background-color: #ffffff;
+  border: 3px solid #0d0d0d;
+  box-shadow: 8px 8px 0px #0d0d0d;
+  max-width: 90vw;
+  max-height: 90vh;
+  overflow-y: auto;
+  width: 100%;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-nb-bg);
+  border: 1px solid var(--color-nb-gray-light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-nb-black);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-nb-gray);
+}
+
+/* Table */
+.table-nb {
+  width: 100%;
+  border-collapse: collapse;
+  border: 2px solid #0d0d0d;
+}
+
+.table-nb th {
+  background-color: #0d0d0d;
+  color: var(--color-nb-yellow);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.75rem 1rem;
+  text-align: left;
+  border-right: 1px solid #2a2a2a;
+}
+
+.table-nb td {
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #e5e5e5;
+  border-right: 1px solid #e5e5e5;
+}
+
+.table-nb tr:nth-child(even) td {
+  background-color: #faf9f4;
+}
+
+.table-nb tr:hover td {
+  background-color: #fff8d6;
+}
+
+/* Sidebar */
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.875rem;
+  font-family: var(--font-mono);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: #0d0d0d;
+  border: 2px solid transparent;
+  text-decoration: none;
+  transition: all 100ms ease;
+}
+
+.sidebar-link:hover {
+  background-color: var(--color-nb-yellow);
+  border-color: #0d0d0d;
+  transform: translateX(4px);
+}
+
+.sidebar-link.active {
+  background-color: var(--color-nb-yellow);
+  border-color: #0d0d0d;
+  box-shadow: 3px 3px 0px #0d0d0d;
+}
+
+/* Loading spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spinner {
+  width: 1.25rem;
+  height: 1.25rem;
+  border: 2px solid #e5e5e5;
+  border-top-color: #0d0d0d;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  display: inline-block;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .section-nb {
+    padding: 3rem 1rem;
+  }
+}
+
+/* =====================
+   SCROLL ANIMATIONS
+   ===================== */
+
+/* Base: elements start hidden, animate in when .visible is added */
+.anim-fade-up {
+  opacity: 0;
+  transform: translateY(40px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.anim-fade-in {
+  opacity: 0;
+  transition: opacity 0.7s ease;
+}
+
+.anim-slide-left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.anim-slide-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.anim-scale-up {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Triggered state */
+.anim-fade-up.visible,
+.anim-fade-in.visible,
+.anim-slide-left.visible,
+.anim-slide-right.visible,
+.anim-scale-up.visible {
+  opacity: 1;
+  transform: none;
+}
+
+/* Stagger delays for children */
+.anim-stagger > *:nth-child(1) { transition-delay: 0ms; }
+.anim-stagger > *:nth-child(2) { transition-delay: 80ms; }
+.anim-stagger > *:nth-child(3) { transition-delay: 160ms; }
+.anim-stagger > *:nth-child(4) { transition-delay: 240ms; }
+.anim-stagger > *:nth-child(5) { transition-delay: 320ms; }
+.anim-stagger > *:nth-child(6) { transition-delay: 400ms; }
+
+/* Delay utilities */
+.anim-delay-100 { transition-delay: 100ms; }
+.anim-delay-200 { transition-delay: 200ms; }
+.anim-delay-300 { transition-delay: 300ms; }
+.anim-delay-400 { transition-delay: 400ms; }
+.anim-delay-500 { transition-delay: 500ms; }

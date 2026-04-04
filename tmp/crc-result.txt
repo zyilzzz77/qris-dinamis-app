@@ -1,0 +1,50 @@
+﻿=== BUILT VALID QRIS ===
+Raw: "00020101021126430014ID.CO.QRIS.WWW0115ID20261234567890202015204541153033605802ID5914TOKO MAJU JAYA6012KOTA JAKARTA61051011062070703***63041CDF"
+Has spaces: 3 spaces
+
+Self-check: embedded CRC = "1CDF", calc = "1CDF", match = true
+
+--- Testing with BUGGY normalizer ---
+
+=== [BUGGY] ===
+Normalized: "00020101021126430014ID.CO.QRIS.WWW0115ID20261234567890202015204541153033605802ID5914TOKOMAJUJAYA6012KOTAJAKARTA61051011062070703***63041CDF"
+Has spaces: 0
+TLV Walk:
+  [TLV Walk] pos=0, tag="00", len=2, value="01"
+  [TLV Walk] pos=6, tag="01", len=2, value="11"
+  [TLV Walk] pos=12, tag="26", len=43, value="0014ID.CO.QRIS.WWW0115ID2026123456789020201"
+  [TLV Walk] pos=59, tag="52", len=4, value="5411"
+  [TLV Walk] pos=67, tag="53", len=3, value="360"
+  [TLV Walk] pos=74, tag="58", len=2, value="ID"
+  [TLV Walk] pos=80, tag="59", len=14, value="TOKOMAJUJAYA60"
+  [TLV Walk] broke at pos=98, tag="12", length=NaN
+RESULT: Γ¥î CRC tag not found
+
+--- Testing with FIXED normalizer ---
+
+=== [FIXED] ===
+Normalized: "00020101021126430014ID.CO.QRIS.WWW0115ID20261234567890202015204541153033605802ID5914TOKO MAJU JAYA6012KOTA JAKARTA61051011062070703***63041CDF"
+Has spaces: 3
+TLV Walk:
+  [TLV Walk] pos=0, tag="00", len=2, value="01"
+  [TLV Walk] pos=6, tag="01", len=2, value="11"
+  [TLV Walk] pos=12, tag="26", len=43, value="0014ID.CO.QRIS.WWW0115ID2026123456789020201"
+  [TLV Walk] pos=59, tag="52", len=4, value="5411"
+  [TLV Walk] pos=67, tag="53", len=3, value="360"
+  [TLV Walk] pos=74, tag="58", len=2, value="ID"
+  [TLV Walk] pos=80, tag="59", len=14, value="TOKO MAJU JAYA"
+  [TLV Walk] pos=98, tag="60", len=12, value="KOTA JAKARTA"
+  [TLV Walk] pos=114, tag="61", len=5, value="10110"
+  [TLV Walk] pos=123, tag="62", len=7, value="0703***"
+  [TLV Walk] pos=134, tag="63", len=4, value="1CDF"
+CRC in QR:    "1CDF"
+CRC calc:     "1CDF"
+RESULT: Γ£à VALID
+
+=== SPACE IMPACT ANALYSIS ===
+Merchant name: "TOKO MAJU JAYA" (len=14)
+Merchant name no-space: "TOKOMAJUJAYA" (len=12)
+City: "KOTA JAKARTA" (len=12)
+City no-space: "KOTAJAKARTA" (len=11)
+
+ΓåÆ When spaces are stripped, the TLV 'length' field no longer matches actual value length ΓåÆ parser breaks!
