@@ -5,8 +5,9 @@
 
 import { handlers } from "@/lib/auth";
 import { logApiRequest } from "@/lib/api-request-log";
+import type { NextRequest } from "next/server";
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
     await logApiRequest({
         request,
         endpoint: "/api/auth/[...nextauth]",
@@ -16,7 +17,7 @@ export async function GET(request: Request) {
     return handlers.GET(request);
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
     await logApiRequest({
         request,
         endpoint: "/api/auth/[...nextauth]",
