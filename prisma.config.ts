@@ -1,8 +1,9 @@
-import { defineConfig, env } from "prisma/config";
+import { defineConfig } from "prisma/config";
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
   datasource: {
-    url: env("DATABASE_URL") ?? "file:./dev.db",
+    // env() throws if missing, so use process.env fallback for smoother deploys.
+    url: process.env.DATABASE_URL ?? "file:./dev.db",
   },
 });
