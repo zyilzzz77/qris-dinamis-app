@@ -10,6 +10,26 @@ interface ApiCallResult {
     payload: unknown;
 }
 
+type BinaryEndpointPayload = {
+    success: boolean;
+    kind: "binary";
+    message: string;
+    contentType: string;
+    sizeBytes: number;
+    redirected: boolean;
+    finalUrl: string | null;
+};
+
+type TextEndpointPayload = {
+    success: boolean;
+    kind: "text";
+    message: string;
+    contentType: string;
+    textPreview: string;
+    textLength: number;
+    truncated: boolean;
+};
+
 type EndpointMethod = "GET" | "POST" | "OPTIONS" | "GET | POST";
 type EndpointBodyType = "none" | "json" | "multipart-file";
 
@@ -112,6 +132,155 @@ function isTransactionEndpoint(endpointId: string): boolean {
         endpointId === "public-payment-confirm-post" ||
         endpointId === "public-image-link-get"
     );
+}
+
+function looksLikeJsonContentType(contentType: string): boolean {
+    return contentType.includes("application/json") || contentType.includes("+json");
+}
+
+function looksLikeBinaryContentType(contentType: string): boolean {
+    return contentType.startsWith("image/") || contentType.includes("application/octet-stream");
+}
+
+function hasKnownBinarySignature(bytes: Uint8Array): boolean {
+    if (bytes.length >= 8) {
+        const isPng =
+            bytes[0] === 0x89 &&
+            bytes[1] === 0x50 &&
+            bytes[2] === 0x4e &&
+            bytes[3] === 0x47 &&
+            bytes[4] === 0x0d &&
+            bytes[5] === 0x0a &&
+            bytes[6] === 0x1a &&
+            bytes[7] === 0x0a;
+
+        if (isPng) {
+            return true;
+        }
+    }
+
+    if (bytes.length >= 3) {
+        const isJpeg = bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+        if (isJpeg) {
+            return true;
+        }
+    }
+
+    if (bytes.length >= 6) {
+        const isGif =
+            bytes[0] === 0x47 &&
+            bytes[1] === 0x49 &&
+            bytes[2] === 0x46 &&
+            bytes[3] === 0x38 &&
+            (bytes[4] === 0x37 || bytes[4] === 0x39) &&
+            bytes[5] === 0x61;
+
+        if (isGif) {
+            return true;
+        }
+    }
+
+    if (bytes.length >= 4) {
+        const isWebpRiff =
+            bytes[0] === 0x52 &&
+            bytes[1] === 0x49 &&
+            bytes[2] === 0x46 &&
+            bytes[3] === 0x46;
+
+        if (isWebpRiff) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+function looksBinaryByByteDistribution(bytes: Uint8Array): boolean {
+    if (bytes.length === 0) {
+        return false;
+    }
+
+    const sampleSize = Math.min(bytes.length, 1024);
+    let nonPrintableCount = 0;
+
+    for (let i = 0; i < sampleSize; i += 1) {
+        const value = bytes[i];
+        const isWhitespace = value === 9 || value === 10 || value === 13;
+        const isPrintableAscii = value >= 32 && value <= 126;
+
+        if (!isWhitespace && !isPrintableAscii) {
+            nonPrintableCount += 1;
+        }
+    }
+
+    return nonPrintableCount / sampleSize > 0.3;
+}
+
+function createBinaryPayload(response: Response, contentType: string, sizeBytes: number): BinaryEndpointPayload {
+    return {
+        success: response.ok,
+        kind: "binary",
+        message: "Endpoint mengembalikan file biner (gambar), bukan JSON.",
+        contentType: contentType || "application/octet-stream",
+        sizeBytes,
+        redirected: response.redirected,
+        finalUrl: response.url || null,
+    };
+}
+
+async function parseEndpointPayload(response: Response): Promise<unknown> {
+    const contentType = (response.headers.get("content-type") || "").toLowerCase();
+
+    if (looksLikeJsonContentType(contentType)) {
+        try {
+            return await response.json();
+        } catch {
+            return {
+                success: response.ok,
+                message: "Response mengaku JSON, tapi tidak bisa di-parse.",
+                contentType: contentType || "application/json",
+            };
+        }
+    }
+
+    const buffer = await response.arrayBuffer();
+    const bytes = new Uint8Array(buffer);
+
+    if (
+        looksLikeBinaryContentType(contentType) ||
+        hasKnownBinarySignature(bytes) ||
+        looksBinaryByByteDistribution(bytes)
+    ) {
+        return createBinaryPayload(response, contentType, bytes.byteLength);
+    }
+
+    const text = new TextDecoder().decode(bytes);
+
+    if (!text.trim()) {
+        return {
+            success: response.ok,
+            message: "Response kosong.",
+            contentType: contentType || "text/plain",
+        };
+    }
+
+    try {
+        return JSON.parse(text);
+    } catch {
+        const maxPreviewLength = 2000;
+        const truncated = text.length > maxPreviewLength;
+        const payload: TextEndpointPayload = {
+            success: response.ok,
+            kind: "text",
+            message: "Endpoint mengembalikan plain text, bukan JSON.",
+            contentType: contentType || "text/plain",
+            textPreview: truncated ? `${text.slice(0, maxPreviewLength)}...` : text,
+            textLength: text.length,
+            truncated,
+        };
+
+        return payload;
+    }
 }
 
 export default function ApiExampleClient({
@@ -322,14 +491,7 @@ export default function ApiExampleClient({
             }
 
             const response = await fetch(selectedEndpoint.path, requestInit);
-            const text = await response.text();
-
-            let payload: unknown = text;
-            try {
-                payload = JSON.parse(text);
-            } catch {
-                // Keep plain text payload when response is not JSON.
-            }
+            const payload = await parseEndpointPayload(response);
 
             setEndpointResults((previous) => ({
                 ...previous,
@@ -359,6 +521,11 @@ export default function ApiExampleClient({
                     ];
                 });
                 setInfo(`Request selesai. transactionId otomatis terisi: ${foundTransactionId}`);
+                return;
+            }
+
+            if (selectedEndpoint.id === "public-image-link-get" && response.ok) {
+                setInfo("Short-link valid dan berhasil mengarah ke file gambar QR.");
                 return;
             }
 
