@@ -1,10 +1,19 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  // Local uploads are served from /public/uploads/ — no remote patterns needed
+  // Uploaded files are exposed under /uploads/*
   images: {
-    // Allow serving from local /uploads/ path
     remotePatterns: [],
+  },
+  async rewrites() {
+    return {
+      beforeFiles: [
+        {
+          source: "/uploads/:path*",
+          destination: "/api/files/:path*",
+        },
+      ],
+    };
   },
 };
 

@@ -43,7 +43,7 @@ export default function Hero() {
                 jadi Dinamis
               </span>
               <br />
-              dalam Detik.
+              dalam 3 Detik.
             </h1>
 
             {/* Subheadline */}
