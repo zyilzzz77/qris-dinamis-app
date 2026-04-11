@@ -759,10 +759,6 @@ export type FloatFieldUpdateOperationsInput = {
   divide?: number
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type TransactionCreateWithoutUserInput = {
   id?: string
   description?: string | null

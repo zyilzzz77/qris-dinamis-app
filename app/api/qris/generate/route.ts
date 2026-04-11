@@ -8,6 +8,7 @@ import {
 } from "@/lib/rate-limit";
 import { saveFile, sanitizeFilename } from "@/lib/storage";
 import { logApiRequest } from "@/lib/api-request-log";
+import { optimizeQrisDynamicImage } from "@/lib/image-optimizer";
 import { calculateTax } from "@/lib/utils";
 import type { TaxType } from "@/types";
 
@@ -157,9 +158,16 @@ export async function POST(request: Request) {
             },
             errorCorrectionLevel: "M",
         });
+        const optimizedQrisImage = await optimizeQrisDynamicImage(qrImageBuffer, "png");
 
-        const filename = sanitizeFilename(`${Date.now()}-${qrisStatic.id}-qris-dynamic.png`);
-        const qrisImageUrl = await saveFile(`qris/${userId}`, filename, qrImageBuffer as Buffer);
+        const filename = sanitizeFilename(
+            `${Date.now()}-${qrisStatic.id}-qris-dynamic.${optimizedQrisImage.extension}`
+        );
+        const qrisImageUrl = await saveFile(
+            `qris/${userId}`,
+            filename,
+            optimizedQrisImage.buffer
+        );
 
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
 

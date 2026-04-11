@@ -44,10 +44,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             email: true,
             password: true,
             image: true,
+            emailVerifiedAt: true,
           },
         });
 
         if (!user || !user.password) return null;
+        if (!user.emailVerifiedAt) return null;
 
         let isValid = false;
         const looksHashed = user.password.startsWith("$2a$") || user.password.startsWith("$2b$");

@@ -56,3 +56,8 @@ export type QrisStatic = Prisma.QrisStaticModel
  * 
  */
 export type Transaction = Prisma.TransactionModel
+/**
+ * Model ApiRequestLog
+ * 
+ */
+export type ApiRequestLog = Prisma.ApiRequestLogModel

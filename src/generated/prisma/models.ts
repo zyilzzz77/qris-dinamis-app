@@ -11,4 +11,5 @@
 export type * from './models/User'
 export type * from './models/QrisStatic'
 export type * from './models/Transaction'
+export type * from './models/ApiRequestLog'
 export type * from './commonInputTypes'

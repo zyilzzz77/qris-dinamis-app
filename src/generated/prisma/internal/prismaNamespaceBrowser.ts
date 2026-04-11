@@ -53,7 +53,8 @@ export const AnyNull = runtime.AnyNull
 export const ModelName = {
   User: 'User',
   QrisStatic: 'QrisStatic',
-  Transaction: 'Transaction'
+  Transaction: 'Transaction',
+  ApiRequestLog: 'ApiRequestLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -75,6 +76,11 @@ export const UserScalarFieldEnum = {
   email: 'email',
   password: 'password',
   image: 'image',
+  emailVerifiedAt: 'emailVerifiedAt',
+  emailVerificationCodeHash: 'emailVerificationCodeHash',
+  emailVerificationCodeExpiresAt: 'emailVerificationCodeExpiresAt',
+  emailVerificationCodeSentAt: 'emailVerificationCodeSentAt',
+  emailVerificationAttempts: 'emailVerificationAttempts',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -120,6 +126,20 @@ export const TransactionScalarFieldEnum = {
 } as const
 
 export type TransactionScalarFieldEnum = (typeof TransactionScalarFieldEnum)[keyof typeof TransactionScalarFieldEnum]
+
+
+export const ApiRequestLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  endpoint: 'endpoint',
+  method: 'method',
+  statusCode: 'statusCode',
+  ip: 'ip',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+} as const
+
+export type ApiRequestLogScalarFieldEnum = (typeof ApiRequestLogScalarFieldEnum)[keyof typeof ApiRequestLogScalarFieldEnum]
 
 
 export const SortOrder = {

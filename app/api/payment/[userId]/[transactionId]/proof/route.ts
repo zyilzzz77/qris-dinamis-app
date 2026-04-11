@@ -9,6 +9,7 @@ import { saveFile, sanitizeFilename } from "@/lib/storage";
 import { toAbsoluteUrlFromRequest } from "@/lib/seo";
 import { checkRateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { logApiRequest } from "@/lib/api-request-log";
+import { optimizeProofImage } from "@/lib/image-optimizer";
 
 type RouteParams = {
     userId: string;
@@ -31,6 +32,23 @@ function jsonResponse(body: unknown, status = 200, extraHeaders: HeadersInit = {
             ...extraHeaders,
         },
     });
+}
+
+function resolveImageExtension(file: File): string {
+    const rawExt = (file.name.split(".").pop() || "").toLowerCase();
+
+    if (["png", "jpg", "jpeg", "webp", "gif", "bmp", "tif", "tiff"].includes(rawExt)) {
+        return rawExt;
+    }
+
+    if (file.type === "image/png") return "png";
+    if (file.type === "image/jpeg") return "jpg";
+    if (file.type === "image/webp") return "webp";
+    if (file.type === "image/gif") return "gif";
+    if (file.type === "image/bmp") return "bmp";
+    if (file.type === "image/tiff") return "tiff";
+
+    return "jpg";
 }
 
 export async function OPTIONS() {
@@ -158,12 +176,17 @@ export async function POST(
             );
         }
 
-        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+        const ext = resolveImageExtension(file);
+        const sourceBuffer = Buffer.from(await file.arrayBuffer());
+        const optimizedImage = await optimizeProofImage(sourceBuffer, ext);
         const filename = sanitizeFilename(
-            `${Date.now()}-${transactionId}-proof.${ext}`
+            `${Date.now()}-${transactionId}-proof.${optimizedImage.extension}`
         );
-        const buffer = Buffer.from(await file.arrayBuffer());
-        const proofImageUrl = await saveFile(`proofs/${userId}`, filename, buffer);
+        const proofImageUrl = await saveFile(
+            `proofs/${userId}`,
+            filename,
+            optimizedImage.buffer
+        );
 
         const updated = await prisma.transaction.update({
             where: { id: transaction.id },

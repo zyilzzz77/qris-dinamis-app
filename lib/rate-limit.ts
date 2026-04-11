@@ -29,23 +29,76 @@ globalThis.__qrisRateLimitStore = STORE;
 
 const CLEANUP_INTERVAL_MS = 60_000;
 
+function normalizeCandidateIp(rawValue: string): string | null {
+    const trimmed = rawValue.trim();
+    if (!trimmed) {
+        return null;
+    }
+
+    let withoutPort = trimmed;
+
+    // [2001:db8::1]:443 -> 2001:db8::1
+    if (withoutPort.startsWith("[") && withoutPort.includes("]")) {
+        withoutPort = withoutPort.slice(1, withoutPort.indexOf("]"));
+    } else if (withoutPort.includes(".") && withoutPort.includes(":")) {
+        // 203.0.113.10:443 -> 203.0.113.10
+        const lastColon = withoutPort.lastIndexOf(":");
+        const maybePort = withoutPort.slice(lastColon + 1);
+        if (/^\d{1,5}$/.test(maybePort)) {
+            withoutPort = withoutPort.slice(0, lastColon);
+        }
+    }
+
+    const normalized = withoutPort.trim().toLowerCase();
+    if (!normalized || normalized.length > 64) {
+        return null;
+    }
+
+    if (!/^[a-f0-9:.]+$/.test(normalized)) {
+        return null;
+    }
+
+    return normalized;
+}
+
 function getIpFromRequest(request: Request): string {
-    const forwardedFor = request.headers.get("x-forwarded-for");
-    if (forwardedFor) {
-        return forwardedFor.split(",")[0].trim();
+    const cfIp = request.headers.get("cf-connecting-ip");
+    if (cfIp) {
+        const normalizedCfIp = normalizeCandidateIp(cfIp);
+        if (normalizedCfIp) {
+            return normalizedCfIp;
+        }
     }
 
     const realIp = request.headers.get("x-real-ip");
     if (realIp) {
-        return realIp.trim();
+        const normalizedRealIp = normalizeCandidateIp(realIp);
+        if (normalizedRealIp) {
+            return normalizedRealIp;
+        }
     }
 
-    const cfIp = request.headers.get("cf-connecting-ip");
-    if (cfIp) {
-        return cfIp.trim();
+    const forwardedFor = request.headers.get("x-forwarded-for");
+    if (forwardedFor) {
+        const firstForwardedIp = forwardedFor.split(",")[0] ?? "";
+        const normalizedForwardedIp = normalizeCandidateIp(firstForwardedIp);
+        if (normalizedForwardedIp) {
+            return normalizedForwardedIp;
+        }
     }
 
     return "unknown";
+}
+
+function getClientIdentifier(request: Request): string {
+    const ip = getIpFromRequest(request);
+    if (ip !== "unknown") {
+        return ip;
+    }
+
+    // Fallback keeps limiter usable when IP header is absent in local/dev setups.
+    const userAgent = request.headers.get("user-agent")?.trim().slice(0, 80) || "unknown-agent";
+    return `unknown:${userAgent}`;
 }
 
 function cleanupExpiredRecords(now: number) {
@@ -70,8 +123,8 @@ export function checkRateLimit(
     const now = Date.now();
     cleanupExpiredRecords(now);
 
-    const ip = getIpFromRequest(request);
-    const key = `${options.keyPrefix}:${ip}`;
+    const clientIdentifier = getClientIdentifier(request);
+    const key = `${options.keyPrefix}:${clientIdentifier}`;
     const existing = STORE.get(key);
 
     if (!existing || existing.resetAt <= now) {

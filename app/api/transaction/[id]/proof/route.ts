@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { saveFile, sanitizeFilename } from "@/lib/storage";
 import { logApiRequest } from "@/lib/api-request-log";
+import { optimizeProofImage } from "@/lib/image-optimizer";
 
 type RouteParams = {
     id: string;
@@ -9,6 +10,23 @@ type RouteParams = {
 
 function jsonResponse(body: unknown, status = 200) {
     return Response.json(body, { status });
+}
+
+function resolveImageExtension(file: File): string {
+    const rawExt = (file.name.split(".").pop() || "").toLowerCase();
+
+    if (["png", "jpg", "jpeg", "webp", "gif", "bmp", "tif", "tiff"].includes(rawExt)) {
+        return rawExt;
+    }
+
+    if (file.type === "image/png") return "png";
+    if (file.type === "image/jpeg") return "jpg";
+    if (file.type === "image/webp") return "webp";
+    if (file.type === "image/gif") return "gif";
+    if (file.type === "image/bmp") return "bmp";
+    if (file.type === "image/tiff") return "tiff";
+
+    return "jpg";
 }
 
 export async function POST(
@@ -105,11 +123,18 @@ export async function POST(
             );
         }
 
-        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-        const filename = sanitizeFilename(`${Date.now()}-${transaction.id}-proof.${ext}`);
-        const buffer = Buffer.from(await file.arrayBuffer());
+        const ext = resolveImageExtension(file);
+        const sourceBuffer = Buffer.from(await file.arrayBuffer());
+        const optimizedImage = await optimizeProofImage(sourceBuffer, ext);
+        const filename = sanitizeFilename(
+            `${Date.now()}-${transaction.id}-proof.${optimizedImage.extension}`
+        );
 
-        const proofImageUrl = await saveFile(`proofs/${userId}`, filename, buffer);
+        const proofImageUrl = await saveFile(
+            `proofs/${userId}`,
+            filename,
+            optimizedImage.buffer
+        );
 
         const updated = await prisma.transaction.update({
             where: { id: transaction.id },

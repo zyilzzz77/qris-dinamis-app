@@ -14,6 +14,7 @@ import { saveFile, sanitizeFilename } from "@/lib/storage";
 import { toAbsoluteUrlFromRequest } from "@/lib/seo";
 import { checkRateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { logApiRequest } from "@/lib/api-request-log";
+import { optimizeQrisDynamicImage } from "@/lib/image-optimizer";
 
 type RouteParams = {
     userId: string;
@@ -94,6 +95,7 @@ export async function GET(
         // Keep database state fresh: expired pending transactions become FAILED.
         await prisma.transaction.updateMany({
             where: {
+                userId,
                 status: { in: ["PENDING", "WAITING_PROOF", "EXPIRED"] },
                 expiresAt: { lt: new Date() },
             },
@@ -140,12 +142,15 @@ export async function GET(
             },
             errorCorrectionLevel: "M",
         });
+        const optimizedQrisImage = await optimizeQrisDynamicImage(qrImageBuffer, "png");
 
-        const filename = sanitizeFilename(`${Date.now()}-${qrisId}-qris-dynamic.png`);
+        const filename = sanitizeFilename(
+            `${Date.now()}-${qrisId}-qris-dynamic.${optimizedQrisImage.extension}`
+        );
         const qrisImageUrl = await saveFile(
             `qris/${userId}`,
             filename,
-            qrImageBuffer as Buffer
+            optimizedQrisImage.buffer
         );
         const qrisImageFullUrl = toAbsoluteUrlFromRequest(qrisImageUrl, request);
 

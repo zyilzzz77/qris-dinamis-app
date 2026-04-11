@@ -386,7 +386,8 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 export const ModelName = {
   User: 'User',
   QrisStatic: 'QrisStatic',
-  Transaction: 'Transaction'
+  Transaction: 'Transaction',
+  ApiRequestLog: 'ApiRequestLog'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -402,7 +403,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "qrisStatic" | "transaction"
+    modelProps: "user" | "qrisStatic" | "transaction" | "apiRequestLog"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -628,6 +629,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ApiRequestLog: {
+      payload: Prisma.$ApiRequestLogPayload<ExtArgs>
+      fields: Prisma.ApiRequestLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ApiRequestLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApiRequestLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ApiRequestLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApiRequestLogPayload>
+        }
+        findFirst: {
+          args: Prisma.ApiRequestLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApiRequestLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ApiRequestLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApiRequestLogPayload>
+        }
+        findMany: {
+          args: Prisma.ApiRequestLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApiRequestLogPayload>[]
+        }
+        create: {
+          args: Prisma.ApiRequestLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApiRequestLogPayload>
+        }
+        createMany: {
+          args: Prisma.ApiRequestLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ApiRequestLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApiRequestLogPayload>[]
+        }
+        delete: {
+          args: Prisma.ApiRequestLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApiRequestLogPayload>
+        }
+        update: {
+          args: Prisma.ApiRequestLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApiRequestLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.ApiRequestLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ApiRequestLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ApiRequestLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApiRequestLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.ApiRequestLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ApiRequestLogPayload>
+        }
+        aggregate: {
+          args: Prisma.ApiRequestLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateApiRequestLog>
+        }
+        groupBy: {
+          args: Prisma.ApiRequestLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ApiRequestLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ApiRequestLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ApiRequestLogCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -670,6 +745,11 @@ export const UserScalarFieldEnum = {
   email: 'email',
   password: 'password',
   image: 'image',
+  emailVerifiedAt: 'emailVerifiedAt',
+  emailVerificationCodeHash: 'emailVerificationCodeHash',
+  emailVerificationCodeExpiresAt: 'emailVerificationCodeExpiresAt',
+  emailVerificationCodeSentAt: 'emailVerificationCodeSentAt',
+  emailVerificationAttempts: 'emailVerificationAttempts',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -717,6 +797,20 @@ export const TransactionScalarFieldEnum = {
 export type TransactionScalarFieldEnum = (typeof TransactionScalarFieldEnum)[keyof typeof TransactionScalarFieldEnum]
 
 
+export const ApiRequestLogScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  endpoint: 'endpoint',
+  method: 'method',
+  statusCode: 'statusCode',
+  ip: 'ip',
+  userAgent: 'userAgent',
+  createdAt: 'createdAt'
+} as const
+
+export type ApiRequestLogScalarFieldEnum = (typeof ApiRequestLogScalarFieldEnum)[keyof typeof ApiRequestLogScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -754,6 +848,13 @@ export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
 
 
 /**
+ * Reference to a field of type 'Int'
+ */
+export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
+    
+
+
+/**
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
@@ -764,13 +865,6 @@ export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
  * Reference to a field of type 'Float'
  */
 export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-/**
- * Reference to a field of type 'Int'
- */
-export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
     
 
 /**
@@ -871,6 +965,7 @@ export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
   qrisStatic?: Prisma.QrisStaticOmit
   transaction?: Prisma.TransactionOmit
+  apiRequestLog?: Prisma.ApiRequestLogOmit
 }
 
 /* Types for Logging */

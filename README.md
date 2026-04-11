@@ -30,6 +30,34 @@ NEXTAUTH_URL="https://bikinqris.app"
 4. Untuk local development, boleh override ke `http://localhost:3000`.
 5. Saat deploy production, set semua env di dashboard hosting (jangan commit `.env.local`).
 
+## Email Verification Setup
+
+Fitur daftar akun sekarang wajib verifikasi kode OTP via email.
+
+1. Isi env SMTP di `.env.local` (lihat `.env.example`):
+	- `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`
+	- `SMTP_USER`, `SMTP_PASS`
+	- `SMTP_FROM`, `SMTP_FROM_NAME`
+2. Isi `EMAIL_VERIFICATION_SECRET` dengan nilai acak kuat.
+3. Jalankan update schema Prisma:
+
+```bash
+npx prisma db push
+npx prisma generate
+```
+
+4. Jalankan aplikasi:
+
+```bash
+npm run dev
+```
+
+Alur user:
+- Register akun di `/sign-up`
+- Sistem kirim kode OTP 6 digit ke email
+- User input kode di halaman sign-up
+- Setelah valid, user otomatis login
+
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.

@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { deleteFile, sanitizeFilename, saveFile } from "@/lib/storage";
 import { logApiRequest } from "@/lib/api-request-log";
+import { optimizeAvatarImage } from "@/lib/image-optimizer";
 
 const MAX_PROFILE_PHOTO_SIZE_BYTES = 3 * 1024 * 1024;
 
@@ -85,10 +86,17 @@ export async function POST(request: Request) {
             );
         }
 
-        const ext = resolveImageExtension(file);
-        const filename = sanitizeFilename(`${Date.now()}-${userId}-avatar.${ext}`);
         const imageBuffer = Buffer.from(await file.arrayBuffer());
-        const imageUrl = await saveFile(`avatars/${userId}`, filename, imageBuffer);
+        const ext = resolveImageExtension(file);
+        const optimizedImage = await optimizeAvatarImage(imageBuffer, ext);
+        const filename = sanitizeFilename(
+            `${Date.now()}-${userId}-avatar.${optimizedImage.extension}`
+        );
+        const imageUrl = await saveFile(
+            `avatars/${userId}`,
+            filename,
+            optimizedImage.buffer
+        );
 
         await prisma.user.update({
             where: { id: userId },

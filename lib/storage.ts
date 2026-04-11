@@ -33,13 +33,17 @@ function toRelativeUploadPath(fileUrlOrPath: string): string | null {
   return null;
 }
 
-export function resolveUploadAbsolutePath(relativePath: string): string | null {
-  const cleaned = relativePath
+function normalizeRelativePath(input: string): string {
+  return input
     .replace(/\\/g, "/")
     .split("/")
     .map((segment) => segment.trim())
     .filter(Boolean)
     .join("/");
+}
+
+export function resolveUploadAbsolutePath(relativePath: string): string | null {
+  const cleaned = normalizeRelativePath(relativePath);
 
   if (!cleaned) {
     return null;
@@ -82,13 +86,30 @@ export async function saveFile(
   filename: string,
   buffer: Buffer
 ): Promise<string> {
-  const dir = path.join(UPLOAD_DIR, subDir);
-  await ensureDir(dir);
+  const safeSubDir = normalizeRelativePath(subDir);
+  const safeFilename = sanitizeFilename(filename.trim());
 
-  const filePath = path.join(dir, filename);
-  await fs.writeFile(filePath, buffer);
+  if (!safeFilename) {
+    throw new Error("Invalid upload filename");
+  }
 
-  return `/uploads/${subDir}/${filename}`;
+  const relativePath = safeSubDir
+    ? `${safeSubDir}/${safeFilename}`
+    : safeFilename;
+
+  const absolutePath = resolveUploadAbsolutePath(relativePath);
+
+  if (!absolutePath) {
+    throw new Error("Invalid upload target path");
+  }
+
+  await ensureDir(path.dirname(absolutePath));
+  await fs.writeFile(absolutePath, buffer);
+
+  const uploadRoot = path.resolve(UPLOAD_DIR);
+  const publicPath = path.relative(uploadRoot, absolutePath).replace(/\\/g, "/");
+
+  return `/uploads/${publicPath}`;
 }
 
 /**

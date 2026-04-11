@@ -13,7 +13,7 @@ function getAuthErrorMessage(errorCode?: string | null) {
     }
 
     if (errorCode === "CredentialsSignin") {
-        return "Email atau password salah. Silakan coba lagi.";
+        return "Email atau password salah, atau email belum diverifikasi.";
     }
 
     if (errorCode === "Configuration") {

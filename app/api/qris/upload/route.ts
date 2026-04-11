@@ -12,6 +12,7 @@ import {
     saveFile,
 } from "@/lib/storage";
 import { logApiRequest } from "@/lib/api-request-log";
+import { optimizeQrisStaticImage } from "@/lib/image-optimizer";
 
 const MAX_QRIS_UPLOAD_SIZE = 5 * 1024 * 1024;
 const SUPPORTED_IMAGE_MIME_TYPES = new Set([
@@ -131,9 +132,16 @@ export async function POST(request: Request) {
             const ext = ["png", "jpg", "jpeg", "gif", "bmp", "tif", "tiff"].includes(rawExt)
                 ? rawExt
                 : "png";
-            const filename = sanitizeFilename(`${Date.now()}-qris-static.${ext}`);
+            const optimizedImage = await optimizeQrisStaticImage(imageBuffer, ext);
+            const filename = sanitizeFilename(
+                `${Date.now()}-qris-static.${optimizedImage.extension}`
+            );
 
-            uploadedImageUrl = await saveFile(`qris-static/${userId}`, filename, imageBuffer);
+            uploadedImageUrl = await saveFile(
+                `qris-static/${userId}`,
+                filename,
+                optimizedImage.buffer
+            );
         }
 
         if (!isLikelyQris(rawQris)) {
