@@ -5,7 +5,9 @@ Dokumen ini setup kirim OTP email full otomatis di VPS sendiri, tanpa layanan em
 Target:
 - Domain app: `bikinqrisdinamis.app`
 - Mail host: `mail.bikinqrisdinamis.app`
-- Pengirim OTP: `no-reply@bikinqrisdinamis.app`
+- Pengirim OTP verifikasi: `alert@bikinqrisdinamis.app`
+- Pengirim notifikasi user: `notification@bikinqrisdinamis.app`
+- Pengirim customer service: `customer-services@bikinqrisdinamis.app`
 - App dan SMTP jalan di VPS yang sama (paling sederhana + gratis software)
 
 ## 0) Prasyarat Wajib
@@ -239,8 +241,18 @@ SMTP_PORT="25"
 SMTP_SECURE="false"
 SMTP_USER=""
 SMTP_PASS=""
-SMTP_FROM="no-reply@bikinqrisdinamis.app"
+SMTP_FROM="notification@bikinqrisdinamis.app"
 SMTP_FROM_NAME="bikinqrisdinamis"
+
+SMTP_FROM_ALERT="alert@bikinqrisdinamis.app"
+SMTP_FROM_ALERT_NAME="bikinqrisdinamis Alert"
+SMTP_FROM_NOTIFICATION="notification@bikinqrisdinamis.app"
+SMTP_FROM_NOTIFICATION_NAME="bikinqrisdinamis Notification"
+SMTP_FROM_CUSTOMER_SERVICE="customer-services@bikinqrisdinamis.app"
+SMTP_FROM_CUSTOMER_SERVICE_NAME="bikinqrisdinamis Customer Services"
+
+PASSWORD_RESET_SECRET="ISI_RANDOM_32+"
+PASSWORD_RESET_TOKEN_EXPIRES_MINUTES="10"
 ```
 
 Sync schema + build app:

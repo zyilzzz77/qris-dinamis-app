@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   History,
   Code2,
+  LifeBuoy,
   Mail,
   UserCircle2,
   LogOut,
@@ -25,6 +26,7 @@ const navItems = [
   { href: "/dashboard", label: "Dashboard", Icon: LayoutDashboard },
   { href: "/history", label: "Riwayat", Icon: History },
   { href: "/rest-api", label: "REST API", Icon: Code2 },
+  { href: "/support", label: "Support", Icon: LifeBuoy },
   { href: "/profile", label: "Profil", Icon: UserCircle2 },
   { href: "/contact-us", label: "Contact Us", Icon: Mail },
 ];

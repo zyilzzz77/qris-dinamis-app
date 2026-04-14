@@ -21,6 +21,7 @@ export type FaqItem = {
 
 export function getSiteUrl(): string {
     const rawSiteUrl =
+        process.env.NEXT_PUBLIC_APP_URL ??
         process.env.NEXT_PUBLIC_SITE_URL ??
         process.env.NEXTAUTH_URL ??
         FALLBACK_SITE_URL;
@@ -40,18 +41,7 @@ function sanitizeProto(rawProto: string): string {
     return rawProto.split(",")[0].trim().replace(/:$/, "");
 }
 
-export function getRequestOrigin(request: Request): string {
-    const configuredSiteUrl =
-        process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXTAUTH_URL;
-
-    if (configuredSiteUrl) {
-        try {
-            return new URL(configuredSiteUrl).origin;
-        } catch {
-            // Ignore malformed env and continue with header-based origin.
-        }
-    }
-
+function resolveOriginFromRequest(request: Request): string | null {
     const forwardedHost = request.headers.get("x-forwarded-host");
     if (forwardedHost) {
         const forwardedProto = request.headers.get("x-forwarded-proto");
@@ -74,8 +64,35 @@ export function getRequestOrigin(request: Request): string {
     try {
         return new URL(request.url).origin;
     } catch {
-        return getSiteUrl();
+        return null;
     }
+}
+
+export function getRequestOrigin(request: Request): string {
+    const configuredSiteUrl =
+        process.env.NEXT_PUBLIC_APP_URL ??
+        process.env.NEXT_PUBLIC_SITE_URL ??
+        process.env.NEXTAUTH_URL;
+
+    const requestOrigin = resolveOriginFromRequest(request);
+
+    if (process.env.NODE_ENV !== "production" && requestOrigin) {
+        return requestOrigin;
+    }
+
+    if (configuredSiteUrl) {
+        try {
+            return new URL(configuredSiteUrl).origin;
+        } catch {
+            // Ignore malformed env and continue with header-based origin.
+        }
+    }
+
+    if (requestOrigin) {
+        return requestOrigin;
+    }
+
+    return getSiteUrl();
 }
 
 export function getMetadataBase(): URL {

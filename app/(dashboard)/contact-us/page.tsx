@@ -24,8 +24,8 @@ const CONTACT_LINKS = [
     {
         id: "email",
         label: "Email",
-        value: "enzilaja@gmail.com",
-        href: "mailto:enzilaja@gmail.com",
+        value: "customer-services@bikinqrisdinamis.app",
+        href: "mailto:customer-services@bikinqrisdinamis.app",
         buttonVariant: "black" as const,
     },
 ];

@@ -38,7 +38,16 @@ Fitur daftar akun sekarang wajib verifikasi kode OTP via email.
 	- `SMTP_HOST`, `SMTP_PORT`, `SMTP_SECURE`
 	- `SMTP_USER`, `SMTP_PASS`
 	- `SMTP_FROM`, `SMTP_FROM_NAME`
-2. Isi `EMAIL_VERIFICATION_SECRET` dengan nilai acak kuat.
+	- `SMTP_FROM_ALERT` untuk OTP verifikasi akun
+	- `SMTP_FROM_NOTIFICATION` untuk notifikasi user (akun berhasil dibuat, lupa password, maintenance)
+	- `SMTP_FROM_CUSTOMER_SERVICE` untuk pesan customer service
+	- Jika provider membatasi sender harus milik akun login SMTP (contoh Spacemail), isi juga:
+	  - `SMTP_USER_ALERT`, `SMTP_PASS_ALERT`
+	  - `SMTP_USER_NOTIFICATION`, `SMTP_PASS_NOTIFICATION`
+	  - `SMTP_USER_CUSTOMER_SERVICE`, `SMTP_PASS_CUSTOMER_SERVICE`
+2. Isi secret email dengan nilai acak kuat:
+	- `EMAIL_VERIFICATION_SECRET`
+	- `PASSWORD_RESET_SECRET`
 3. Jalankan update schema Prisma:
 
 ```bash
@@ -57,6 +66,7 @@ Alur user:
 - Sistem kirim kode OTP 6 digit ke email
 - User input kode di halaman sign-up
 - Setelah valid, user otomatis login
+- Jika lupa password, user bisa request reset di `/forgot-password`
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

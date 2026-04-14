@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { Eye, EyeOff } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 
@@ -23,6 +24,28 @@ function getAuthErrorMessage(errorCode?: string | null) {
     return `Login gagal (${errorCode}).`;
 }
 
+function PasswordToggleButton({
+    visible,
+    onToggle,
+    inputId,
+}: {
+    visible: boolean;
+    onToggle: () => void;
+    inputId: string;
+}) {
+    return (
+        <button
+            type="button"
+            aria-label={visible ? "Sembunyikan password" : "Lihat password"}
+            aria-controls={inputId}
+            onClick={onToggle}
+            className="text-nb-gray hover:text-nb-black transition-colors"
+        >
+            {visible ? <EyeOff size={18} /> : <Eye size={18} />}
+        </button>
+    );
+}
+
 function SignInForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -30,7 +53,9 @@ function SignInForm() {
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
+    const [infoMessage, setInfoMessage] = useState("");
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -38,11 +63,17 @@ function SignInForm() {
         if (urlError) {
             setError(getAuthErrorMessage(urlError));
         }
+
+        const resetStatus = searchParams.get("reset");
+        if (resetStatus === "success") {
+            setInfoMessage("Password berhasil direset. Silakan login dengan password baru.");
+        }
     }, [searchParams]);
 
     async function handleSubmit(event: FormEvent) {
         event.preventDefault();
         setError("");
+        setInfoMessage("");
         setLoading(true);
 
         try {
@@ -102,6 +133,18 @@ function SignInForm() {
                         Masuk ke Akun
                     </h2>
 
+                    {infoMessage && (
+                        <div
+                            className="mb-4 p-3 font-mono text-sm font-bold text-nb-black"
+                            style={{
+                                backgroundColor: "#9FD9B4",
+                                border: "2px solid #0D0D0D",
+                            }}
+                        >
+                            {infoMessage}
+                        </div>
+                    )}
+
                     {error && (
                         <div
                             className="mb-4 p-3 font-mono text-sm font-bold text-white"
@@ -127,14 +170,30 @@ function SignInForm() {
                         />
                         <Input
                             id="sign-in-password"
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             label="Password"
                             placeholder="••••••••"
                             value={password}
                             onChange={(event) => setPassword(event.target.value)}
                             required
                             autoComplete="current-password"
+                            rightIcon={
+                                <PasswordToggleButton
+                                    visible={showPassword}
+                                    onToggle={() => setShowPassword((current) => !current)}
+                                    inputId="sign-in-password"
+                                />
+                            }
                         />
+
+                        <div className="-mt-2 text-right">
+                            <Link
+                                href="/forgot-password"
+                                className="font-mono text-xs font-bold text-nb-blue underline underline-offset-2"
+                            >
+                                Lupa password?
+                            </Link>
+                        </div>
 
                         <Button
                             type="submit"

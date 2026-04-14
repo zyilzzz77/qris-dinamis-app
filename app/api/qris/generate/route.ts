@@ -10,6 +10,7 @@ import { saveFile, sanitizeFilename } from "@/lib/storage";
 import { logApiRequest } from "@/lib/api-request-log";
 import { optimizeQrisDynamicImage } from "@/lib/image-optimizer";
 import { calculateTax } from "@/lib/utils";
+import { cleanupExpiredTransactionsForUser } from "@/lib/transaction-expiry";
 import type { TaxType } from "@/types";
 
 type GenerateBody = {
@@ -120,21 +121,7 @@ export async function POST(request: Request) {
             );
         }
 
-        // Keep database state fresh: expired pending transactions become FAILED.
-        await prisma.transaction.updateMany({
-            where: {
-                userId,
-                status: {
-                    in: ["PENDING", "WAITING_PROOF", "EXPIRED"],
-                },
-                expiresAt: {
-                    lt: new Date(),
-                },
-            },
-            data: {
-                status: "FAILED",
-            },
-        });
+        await cleanupExpiredTransactionsForUser(userId);
 
         const { taxAmount, taxRate, totalAmount } = calculateTax(
             baseAmount,

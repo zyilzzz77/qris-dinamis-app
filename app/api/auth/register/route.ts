@@ -15,7 +15,10 @@ import {
     isValidEmailAddress,
     normalizeEmailAddress,
 } from "@/lib/email-verification";
-import { sendVerificationCodeEmail } from "@/lib/mailer";
+import {
+    sendAccountCreatedNotificationEmail,
+    sendVerificationCodeEmail,
+} from "@/lib/mailer";
 
 function jsonResponse(body: unknown, status = 200, headers: HeadersInit = {}) {
     return Response.json(body, {
@@ -152,6 +155,15 @@ export async function POST(request: NextRequest) {
                 code: verificationData.code,
                 expiresInMinutes: EMAIL_VERIFICATION_CODE_EXPIRES_MINUTES,
             });
+
+            if (!existing) {
+                sendAccountCreatedNotificationEmail({
+                    to: user.email,
+                    name: user.name,
+                }).catch((notificationError) => {
+                    console.error("[REGISTER_SEND_ACCOUNT_CREATED_NOTIFICATION]", notificationError);
+                });
+            }
         } catch (mailError) {
             console.error("[REGISTER_SEND_VERIFICATION_EMAIL]", mailError);
             return jsonResponse(

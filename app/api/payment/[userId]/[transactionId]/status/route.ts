@@ -6,6 +6,7 @@
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { logApiRequest } from "@/lib/api-request-log";
+import { markTransactionFailedAndCleanupQrisImage } from "@/lib/transaction-expiry";
 
 type RouteParams = {
     userId: string;
@@ -75,6 +76,7 @@ export async function GET(
                 id: true,
                 userId: true,
                 status: true,
+                qrisImageUrl: true,
                 proofImageUrl: true,
                 expiresAt: true,
                 baseAmount: true,
@@ -113,7 +115,14 @@ export async function GET(
             }
         }
 
-        if (normalizedStatus !== transaction.status) {
+        if (normalizedStatus === "FAILED") {
+            if (transaction.status !== "FAILED" || transaction.qrisImageUrl) {
+                await markTransactionFailedAndCleanupQrisImage({
+                    transactionId: transaction.id,
+                    qrisImageUrl: transaction.qrisImageUrl,
+                });
+            }
+        } else if (normalizedStatus !== transaction.status) {
             await prisma.transaction.update({
                 where: { id: transaction.id },
                 data: { status: normalizedStatus },

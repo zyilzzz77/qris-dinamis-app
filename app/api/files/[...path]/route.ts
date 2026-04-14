@@ -12,6 +12,13 @@ const MIME_TYPES: Record<string, string> = {
     ".jpeg": "image/jpeg",
     ".webp": "image/webp",
     ".gif": "image/gif",
+    ".bmp": "image/bmp",
+    ".tif": "image/tiff",
+    ".tiff": "image/tiff",
+    ".mp4": "video/mp4",
+    ".webm": "video/webm",
+    ".mov": "video/quicktime",
+    ".avi": "video/x-msvideo",
     ".svg": "image/svg+xml",
     ".pdf": "application/pdf",
 };

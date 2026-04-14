@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { saveFile, sanitizeFilename } from "@/lib/storage";
 import { logApiRequest } from "@/lib/api-request-log";
 import { optimizeProofImage } from "@/lib/image-optimizer";
+import { markTransactionFailedAndCleanupQrisImage } from "@/lib/transaction-expiry";
 
 type RouteParams = {
     id: string;
@@ -64,6 +65,7 @@ export async function POST(
             select: {
                 id: true,
                 status: true,
+                qrisImageUrl: true,
                 expiresAt: true,
             },
         });
@@ -87,10 +89,10 @@ export async function POST(
             (transaction.expiresAt ? transaction.expiresAt.getTime() < Date.now() : false);
 
         if (transaction.status === "FAILED" || isExpired) {
-            if (transaction.status !== "FAILED") {
-                await prisma.transaction.update({
-                    where: { id: transaction.id },
-                    data: { status: "FAILED" },
+            if (isExpired || transaction.qrisImageUrl) {
+                await markTransactionFailedAndCleanupQrisImage({
+                    transactionId: transaction.id,
+                    qrisImageUrl: transaction.qrisImageUrl,
                 });
             }
 

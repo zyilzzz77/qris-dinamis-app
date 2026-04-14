@@ -8,6 +8,7 @@ import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit, rateLimitHeaders } from "@/lib/rate-limit";
 import { logApiRequest } from "@/lib/api-request-log";
+import { markTransactionFailedAndCleanupQrisImage } from "@/lib/transaction-expiry";
 
 type RouteParams = {
     userId: string;
@@ -76,6 +77,7 @@ export async function POST(
             select: {
                 id: true,
                 status: true,
+                qrisImageUrl: true,
                 proofImageUrl: true,
                 expiresAt: true,
                 confirmedAt: true,
@@ -102,6 +104,13 @@ export async function POST(
         }
 
         if (transaction.status === "FAILED") {
+            if (transaction.qrisImageUrl) {
+                await markTransactionFailedAndCleanupQrisImage({
+                    transactionId: transaction.id,
+                    qrisImageUrl: transaction.qrisImageUrl,
+                });
+            }
+
             return jsonResponse(
                 { success: false, error: "Transaksi sudah gagal" },
                 410
@@ -109,9 +118,9 @@ export async function POST(
         }
 
         if (transaction.status === "EXPIRED") {
-            await prisma.transaction.update({
-                where: { id: transaction.id },
-                data: { status: "FAILED" },
+            await markTransactionFailedAndCleanupQrisImage({
+                transactionId: transaction.id,
+                qrisImageUrl: transaction.qrisImageUrl,
             });
 
             return jsonResponse(
@@ -121,9 +130,9 @@ export async function POST(
         }
 
         if (transaction.expiresAt && transaction.expiresAt.getTime() < Date.now()) {
-            await prisma.transaction.update({
-                where: { id: transaction.id },
-                data: { status: "FAILED" },
+            await markTransactionFailedAndCleanupQrisImage({
+                transactionId: transaction.id,
+                qrisImageUrl: transaction.qrisImageUrl,
             });
 
             return jsonResponse(

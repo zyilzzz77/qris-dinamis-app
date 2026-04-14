@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logApiRequest } from "@/lib/api-request-log";
+import { markTransactionFailedAndCleanupQrisImage } from "@/lib/transaction-expiry";
 
 type RouteParams = {
     id: string;
@@ -45,6 +46,7 @@ export async function POST(
             select: {
                 id: true,
                 status: true,
+                qrisImageUrl: true,
                 expiresAt: true,
                 proofImageUrl: true,
                 confirmedAt: true,
@@ -75,10 +77,10 @@ export async function POST(
             (transaction.expiresAt ? transaction.expiresAt.getTime() < Date.now() : false);
 
         if (transaction.status === "FAILED" || isExpired) {
-            if (transaction.status !== "FAILED") {
-                await prisma.transaction.update({
-                    where: { id: transaction.id },
-                    data: { status: "FAILED" },
+            if (isExpired || transaction.qrisImageUrl) {
+                await markTransactionFailedAndCleanupQrisImage({
+                    transactionId: transaction.id,
+                    qrisImageUrl: transaction.qrisImageUrl,
                 });
             }
 

@@ -10,6 +10,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getRequestOrigin } from "@/lib/seo";
+import { markTransactionFailedAndCleanupQrisImage } from "@/lib/transaction-expiry";
 
 type RouteParams = {
     userId: string;
@@ -52,10 +53,10 @@ export async function GET(
         }
 
         if (tx.expiresAt && tx.expiresAt.getTime() < Date.now()) {
-            if (tx.status !== "PAID" && tx.status !== "FAILED") {
-                await prisma.transaction.update({
-                    where: { id: tx.id },
-                    data: { status: "FAILED" },
+            if (tx.status !== "PAID") {
+                await markTransactionFailedAndCleanupQrisImage({
+                    transactionId: tx.id,
+                    qrisImageUrl: tx.qrisImageUrl,
                 });
             }
 

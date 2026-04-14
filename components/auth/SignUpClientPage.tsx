@@ -4,8 +4,31 @@ import { useEffect, useState, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
+import { Eye, EyeOff } from "lucide-react";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
+
+function PasswordToggleButton({
+    visible,
+    onToggle,
+    inputId,
+}: {
+    visible: boolean;
+    onToggle: () => void;
+    inputId: string;
+}) {
+    return (
+        <button
+            type="button"
+            aria-label={visible ? "Sembunyikan password" : "Lihat password"}
+            aria-controls={inputId}
+            onClick={onToggle}
+            className="text-nb-gray hover:text-nb-black transition-colors"
+        >
+            {visible ? <EyeOff size={18} /> : <Eye size={18} />}
+        </button>
+    );
+}
 
 export default function SignUpClientPage() {
     const router = useRouter();
@@ -14,6 +37,8 @@ export default function SignUpClientPage() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [verificationCode, setVerificationCode] = useState("");
     const [verificationEmail, setVerificationEmail] = useState("");
     const [isVerificationStage, setIsVerificationStage] = useState(false);
@@ -243,7 +268,7 @@ export default function SignUpClientPage() {
                             />
                             <Input
                                 id="sign-up-password"
-                                type="password"
+                                type={showPassword ? "text" : "password"}
                                 label="Password"
                                 placeholder="Min. 8 karakter"
                                 value={password}
@@ -251,16 +276,32 @@ export default function SignUpClientPage() {
                                 hint="Minimal 8 karakter"
                                 required
                                 autoComplete="new-password"
+                                rightIcon={
+                                    <PasswordToggleButton
+                                        visible={showPassword}
+                                        onToggle={() => setShowPassword((current) => !current)}
+                                        inputId="sign-up-password"
+                                    />
+                                }
                             />
                             <Input
                                 id="sign-up-confirm-password"
-                                type="password"
+                                type={showConfirmPassword ? "text" : "password"}
                                 label="Konfirmasi Password"
                                 placeholder="Ulangi password"
                                 value={confirmPassword}
                                 onChange={(event) => setConfirmPassword(event.target.value)}
                                 required
                                 autoComplete="new-password"
+                                rightIcon={
+                                    <PasswordToggleButton
+                                        visible={showConfirmPassword}
+                                        onToggle={() =>
+                                            setShowConfirmPassword((current) => !current)
+                                        }
+                                        inputId="sign-up-confirm-password"
+                                    />
+                                }
                             />
 
                             <Button
