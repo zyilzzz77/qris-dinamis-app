@@ -42,6 +42,9 @@ yarn-error.log*
 # runtime upload artifacts
 public/uploads/
 
+# temporary nested repo sandbox
+tmp/caveman-check/
+
 # vercel
 .vercel
 
